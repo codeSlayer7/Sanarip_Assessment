@@ -1,28 +1,30 @@
-import { createSlice } from '@reduxjs/toolkit'
-import data from '../../assets/data/json_mock.json'
+import { createSlice } from "@reduxjs/toolkit";
+import data from "../../assets/data/MOCK_DATA.json";
 const initialState = {
-   data
-}
+  data,
+};
 
 export const cardSlice = createSlice({
-  name: 'card',
+  name: "card",
   initialState,
   reducers: {
     customData: (state) => {
-     
-      state.data.forEach(el => el.liked = false);
-      state.data = state.data.splice(0,20);
+      state.data.forEach((el) => (el.liked = false));
+      state.data = state.data.splice(0, 20);
     },
-    decrement: (state) => {
-      state.value -= 1
+    favorites: (state) => {
+      state.data = state.data.filter((el) => el.liked === true);
     },
-    incrementByAmount: (state, action) => {
-      state.value += action.payload
+    likedItem: (state, { payload }) => {
+      console.log(payload);
+      let liked = state.data.find((el) => el.id === payload.id);
+      console.log(liked);
+      liked.liked = !liked.liked;
     },
   },
-})
+});
 
 // Action creators are generated for each case reducer function
-export const { customData } = cardSlice.actions
+export const { customData, favorites, likedItem } = cardSlice.actions;
 
-export default cardSlice.reducer
+export default cardSlice.reducer;

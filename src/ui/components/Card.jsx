@@ -1,19 +1,54 @@
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 import useMediaQuery from "../../hook/useMeduaQuery";
+import { useDispatch } from "react-redux";
+import { likedItem } from "../../redux/slices/cardSlice";
 
-/* eslint-disable react/prop-types */
-const Card = ({ img, title, description } ) => {
-  
+export const Card = ({ img, title, description, id, liked }) => {
+  const dispatch = useDispatch();
   const isDesktop = useMediaQuery("(min-width: 960px)");
   return (
     <div>
       <div className="w-[100%] h-[30vh]  ">
         <div className="w-full h-full relative">
-          <div className="absolute left-[85%] md:left-[88%] top-[2%] hover:opacity-50">
-            <FavoriteBorderOutlined
-              style={{ fontSize: isDesktop ? "40px" : "50px", color: "white" }}
-            />
-          </div>
+          {!liked ? (
+            <div
+              className="absolute left-[85%] md:left-[88%] top-[2%] hover:opacity-50"
+              onClick={() =>
+                dispatch(
+                  likedItem({
+                    id,
+                  })
+                )
+              }
+            >
+              <FavoriteBorderOutlined
+                style={{
+                  fontSize: isDesktop ? "40px" : "50px",
+                  color: "white",
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              onClick={() =>
+                dispatch(
+                  likedItem({
+                    id,
+                  })
+                )
+              }
+              className="absolute left-[85%] md:left-[88%] top-[2%] hover:opacity-50 "
+            >
+              <FavoriteBorderOutlined
+                style={{
+                  fontSize: isDesktop ? "40px" : "50px",
+                  color: "#EE4B2B",
+                  textShadow: " white 2px 5px",
+                }}
+              />
+            </div>
+          )}
+
           <img src={img} className="object-cover w-full h-full" />
         </div>
       </div>
@@ -24,5 +59,3 @@ const Card = ({ img, title, description } ) => {
     </div>
   );
 };
-
-export default Card;

@@ -5,8 +5,13 @@ import TextField from "@mui/material/TextField";
 import { auth, createUserDocument } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { signUpThunk, updateUserThunk } from "../../redux/slices/userSlice";
+import {
+  createGuest,
+  signUpThunk,
+  updateUserThunk,
+} from "../../redux/slices/userSlice";
 import { useEffect, useState } from "react";
+import { Link, redirect, useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object({
   email: yup
@@ -27,25 +32,29 @@ const validationSchema = yup.object({
   job: yup.string("write your job").required("Job is required"),
 });
 
-const SignUp = ({ label }) => {
+const SignUp = ({ edit }) => {
   const dispatch = useDispatch();
   const [isAuth, setAuth] = useState(null);
-
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
   const formik = useFormik({
     initialValues: {
-      email: "@example.com",
-      password: "Doobar",
-      name: "Sakyt",
-      surname: "Abykanov",
-      job: "what do you do?",
+      email: "",
+      password: "",
+      name: "",
+      surname: "",
+      job: "",
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       if (isAuth) {
-        dispatch(updateUserThunk({user: values}))
+        dispatch(updateUserThunk({ user: values }));
       } else {
         dispatch(signUpThunk({ user: values }));
       }
+      setTimeout(()=>{
+        navigate("/", { replace: true });
+      },1000)
     },
   });
 
@@ -56,11 +65,11 @@ const SignUp = ({ label }) => {
       formik.setValues(user);
     }
   }, []);
-  console.log(isAuth);
+
   return (
     <>
       <div className="w-[100%] h-[80vh] mx-auto  p-4  flex flex-col items-center">
-        <h2>{label ? label : "Sign Up"}</h2>
+        <h2>{edit ? "Edit profile" : "Sign Up"}</h2>
         <div>
           <form onSubmit={formik.handleSubmit}>
             <TextField
@@ -75,7 +84,7 @@ const SignUp = ({ label }) => {
               error={!!formik.touched.email && Boolean(formik.errors.email)}
               helperText={(formik.touched.email && formik.errors.email) || ""}
             />
-            {!isAuth && (
+            {!edit && (
               <TextField
                 sx={{ margin: "20px 0px 20px 0px", position: "relative" }}
                 fullWidth
@@ -136,9 +145,28 @@ const SignUp = ({ label }) => {
               error={!!formik.touched.job && Boolean(formik.errors.job)}
               helperText={(!!formik.touched.job && formik.errors.job) || ""}
             />
+            {!edit && (
+              <div className="flex flex-col px-3 pb-2 items-end">
+                <Link to="/signIn">
+                  <h3 className="text-lg text-gray-400 hover:text-slate-600 ">
+                    {" "}
+                    I have accounnt{" "}
+                  </h3>
+                </Link>
+                <h3
+                  onClick={() => {
+                    dispatch(createGuest({ guest: true }));
+                    navigate("/", { replace: true });
+                  }}
+                  className="text-lg text-gray-400 hover:text-slate-600 "
+                >
+                  Enter without accaunt
+                </h3>
+              </div>
+            )}
 
             <Button color="primary" variant="contained" fullWidth type="submit">
-              Submit
+              {edit ? "Edit" : "Submit"}
             </Button>
           </form>
         </div>

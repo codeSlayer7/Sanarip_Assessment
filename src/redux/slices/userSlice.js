@@ -3,7 +3,12 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { getUserDocument, auth, createUserDocument, updateUserDocument } from "../../firebase";
+import {
+  getUserDocument,
+  auth,
+  createUserDocument,
+  updateUserDocument,
+} from "../../firebase";
 import { CoPresentOutlined } from "@mui/icons-material";
 
 const initialState = {
@@ -11,6 +16,7 @@ const initialState = {
   surname: "",
   job: "",
   email: "",
+  errorMessage: ""
 };
 
 export const loginUserThunk = createAsyncThunk(
@@ -27,10 +33,7 @@ export const loginUserThunk = createAsyncThunk(
       // create user in fireBase auth by email
       // and password the same time get data in fireStore where id user is key for data.
       const userData = await getUserDocument(credential);
-      localStorage.setItem(
-        "user",
-        JSON.stringify(userData)
-      );
+      localStorage.setItem("user", JSON.stringify(userData));
       return userData;
     } catch (err) {
       return rejectWithValue(err);
@@ -53,7 +56,7 @@ export const signUpThunk = createAsyncThunk(
       const userData = await createUserDocument(user, { surname, name, job });
       localStorage.setItem(
         "user",
-        JSON.stringify({...userData, id: user.uid})
+        JSON.stringify({ ...userData, id: user.uid })
       );
       return userData;
     } catch (err) {
@@ -61,25 +64,38 @@ export const signUpThunk = createAsyncThunk(
     }
   }
 );
-export const updateUserThunk = createAsyncThunk(
-    "user/signup",
-    async (payload, { rejectWithValue }) => {
-        console.log(payload);
-      try {
-        const { email, id, surname, name, job } = payload.user;
-  
-        const userData = await updateUserDocument(id, {email, name, surname, job})
-        console.log(userData, 'updated')
-        localStorage.setItem(
-          "user",
-          JSON.stringify({...userData, id})
-        );
-        return userData;
-      } catch (err) {
-        return rejectWithValue(err);
-      }
+export const createGuest = createAsyncThunk(
+  "user/ghest",
+  async (payload, { rejectWithValue }) => {
+    try {
+      localStorage.setItem("user", JSON.stringify(payload.guest));
+      return { user: "name" };
+    } catch (err) {
+      return rejectWithValue(err);
     }
-  );
+  }
+);
+export const updateUserThunk = createAsyncThunk(
+  "user/signup",
+  async (payload, { rejectWithValue }) => {
+    console.log(payload);
+    try {
+      const { email, id, surname, name, job } = payload.user;
+
+      const userData = await updateUserDocument(id, {
+        email,
+        name,
+        surname,
+        job,
+      });
+      console.log(userData, "updated");
+      localStorage.setItem("user", JSON.stringify({ ...userData, id }));
+      return userData;
+    } catch (err) {
+      return rejectWithValue(err.error.message);
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -90,6 +106,7 @@ const userSlice = createSlice({
       state.job = "";
       state.name = "";
       state.surname = "";
+      localStorage.clear();
     },
   },
   extraReducers: (builder) => {
@@ -106,10 +123,15 @@ const userSlice = createSlice({
         state.job = job;
         state.name = name;
         state.surname = surname;
+      }),
+      builder.addCase(signUpThunk.rejected, (state, { payload }) => {
+        console.log('error sign up', payload);
+        state.errorMessage = payload.error;
+      
       });
   },
 });
 
-export const { setAccessToken, setRefreshToken } = userSlice.actions;
+export const { logout } = userSlice.actions;
 
 export default userSlice.reducer;

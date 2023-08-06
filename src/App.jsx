@@ -1,31 +1,33 @@
 import SignIn from "./ui/components/SignIn";
 import SignUp from "./ui/components/SignUp";
 import { Navbar } from "./ui/components/Navbar";
-import Card from "./ui/components/Card";
 import Cards from "./ui/components/Cards";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-
-const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) {
-    // user is not authenticated
-    return <Navigate to="/" />;
-  }
-  return children;
-};
+import { Route, Routes } from "react-router-dom";
+import { ProtectedRoute } from "./assets/routes/ProtectedRoute";
+import { Profile } from "./ui/components/Profile";
+import CardPage from "./ui/pages/cardPage";
 
 function App() {
- 
-// I did not finish it sorry 
+  // I did not finish it sorry
   return (
-    <>
-      <Navbar>
-        {/* <Cards/> */}
-        {/* <SignIn /> */}
-        <SignUp />
-      </Navbar>
-    </>
+    <Routes>
+      <Route
+        index
+        element={
+          <ProtectedRoute>
+            <Navbar>
+              <Cards />
+            </Navbar>
+          </ProtectedRoute>
+        }
+      />{" "}
+      <Route path="/Profile" element={<Profile />} />
+      <Route path="/signUp" element={<SignUp />} />
+      <Route path="/signIn" element={<SignIn />} />
+      <Route path="/:id" element={<CardPage />} />
+    </Routes>
   );
 }
 

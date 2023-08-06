@@ -4,8 +4,12 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
+import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/slices/userSlice";
+import { favorites } from "../../redux/slices/cardSlice";
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -25,7 +29,7 @@ const StyledMenu = styled((props) => (
     borderRadius: 6,
     marginTop: theme.spacing(1),
     minWidth: 180,
-  
+
     color:
       theme.palette.mode === "light"
         ? "rgb(55, 65, 81)"
@@ -53,6 +57,15 @@ const StyledMenu = styled((props) => (
 
 export const MenuComp = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isAuth, setAuth] = useState(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setAuth(user);
+    }
+  }, []);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -82,15 +95,41 @@ export const MenuComp = () => {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        style={{position: 'reletive'}}
+        style={{ position: "reletive" }}
       >
-        <MenuItem onClick={handleClose} disableRipple >
-          Favorites
-        </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose} disableRipple >
-          Profile
-        </MenuItem>
+      
+          <MenuItem onClick={()=>{handleClose, dispatch(favorites())}} disableRipple>
+            Favorites
+          </MenuItem>
+    
+
+        {typeof isAuth !== "boolean" ? (
+          <Link to="Profile">
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem onClick={handleClose} disableRipple>
+              Profile
+            </MenuItem>
+          </Link>
+        ) : (
+          <Link to="signUp">
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem onClick={handleClose} disableRipple>
+              Sign Up
+            </MenuItem>
+          </Link>
+        )}
+        {typeof isAuth !== "boolean" && (
+          <Link to="/signUp">
+            <MenuItem
+              onClick={() => {
+                handleClose(dispatch(logout()));
+              }}
+              disableRipple
+            >
+              Log Out
+            </MenuItem>
+          </Link>
+        )}  
       </StyledMenu>
     </div>
   );

@@ -2,8 +2,9 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUserThunk } from "../../redux/slices/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = yup.object({
   email: yup
@@ -18,7 +19,8 @@ const validationSchema = yup.object({
 
 const SignIn = () => {
   const dispatch = useDispatch();
-
+  const user = useSelector((state) => state);
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       email: "foobar@example.com",
@@ -27,19 +29,10 @@ const SignIn = () => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       dispatch(loginUserThunk({ user: values }));
-      // const { email, password } = values;
-      // console.log(values);
-      // signInWithEmailAndPassword(auth, email, password)
-      //   .then((credential) => {
-      //     getUserDocument(credential)
-      //     console.log(credential);
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //   });
-      //   alert(JSON.stringify(values, null, 2));
+      navigate("/", { replace: true });
     },
   });
+
 
   return (
     <>
@@ -74,6 +67,15 @@ const SignIn = () => {
               }
               helperText={!!formik.touched.password && formik.errors.password}
             />
+            <h3
+              onClick={() => {
+                dispatch(createGuest({ guest: true }));
+                navigate("/", { replace: true });
+              }}
+              className="text-lg text-gray-400 hover:text-slate-600 mb-3"
+            >
+              Enter without accaunt
+            </h3>
             <Button color="primary" variant="contained" fullWidth type="submit">
               Submit
             </Button>
